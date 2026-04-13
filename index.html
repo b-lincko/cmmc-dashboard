@@ -1,0 +1,1448 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CMMC Level 2 Compliance Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #2563eb;
+            --primary-dark: #1e40af;
+            --primary-light: #3b82f6;
+            --secondary: #64748b;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --border: #e2e8f0;
+            --bg-light: #f8fafc;
+            --bg-white: #ffffff;
+            --text-dark: #1e293b;
+            --text-gray: #64748b;
+            --shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            --shadow-lg: 0 10px 25px rgba(0, 0, 0, 0.1);
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #dbeafe 0%, #e0e7ff 100%);
+            color: var(--text-dark);
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 1rem;
+        }
+
+        /* Login Page */
+        .login-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 1rem;
+        }
+
+        .login-card {
+            background: var(--bg-white);
+            border-radius: 12px;
+            box-shadow: var(--shadow-lg);
+            width: 100%;
+            max-width: 400px;
+            overflow: hidden;
+        }
+
+        .login-header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            padding: 2rem;
+            text-align: center;
+        }
+
+        .login-header h1 {
+            font-size: 1.8rem;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .login-header p {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+
+        .login-body {
+            padding: 2rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: var(--text-dark);
+            font-size: 0.95rem;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 6px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+            text-align: center;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+            width: 100%;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+        }
+
+        .btn-primary:disabled {
+            background: var(--secondary);
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .error-message {
+            background: #fee2e2;
+            color: #dc2626;
+            padding: 0.75rem;
+            border-radius: 6px;
+            margin-bottom: 1rem;
+            font-size: 0.9rem;
+            display: none;
+        }
+
+        .error-message.show {
+            display: block;
+        }
+
+        .login-footer {
+            text-align: center;
+            margin-top: 2rem;
+            padding-top: 2rem;
+            border-top: 1px solid var(--border);
+            font-size: 0.9rem;
+            color: var(--text-gray);
+        }
+
+        /* Dashboard */
+        .dashboard-container {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        .sidebar {
+            width: 280px;
+            background: var(--bg-white);
+            border-right: 1px solid var(--border);
+            padding: 2rem 0;
+            box-shadow: var(--shadow);
+            overflow-y: auto;
+            position: fixed;
+            height: 100vh;
+            left: 0;
+            top: 0;
+        }
+
+        .sidebar-header {
+            padding: 0 1.5rem;
+            margin-bottom: 2rem;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 1.5rem;
+        }
+
+        .sidebar-header h2 {
+            font-size: 1.3rem;
+            color: var(--primary);
+            margin-bottom: 0.25rem;
+        }
+
+        .sidebar-header p {
+            font-size: 0.8rem;
+            color: var(--text-gray);
+        }
+
+        .nav-item {
+            display: block;
+            padding: 0.75rem 1.5rem;
+            color: var(--text-dark);
+            text-decoration: none;
+            transition: all 0.3s;
+            border-left: 3px solid transparent;
+            font-weight: 500;
+        }
+
+        .nav-item:hover {
+            background: var(--bg-light);
+            border-left-color: var(--primary);
+            padding-left: 1.25rem;
+        }
+
+        .nav-item.active {
+            background: var(--bg-light);
+            border-left-color: var(--primary);
+            color: var(--primary);
+        }
+
+        .nav-section {
+            margin-bottom: 2rem;
+        }
+
+        .nav-section-title {
+            padding: 0 1.5rem;
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: var(--text-gray);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 0.5rem;
+        }
+
+        .main-content {
+            margin-left: 280px;
+            flex: 1;
+            padding: 2rem;
+        }
+
+        .header {
+            background: var(--bg-white);
+            padding: 1.5rem 2rem;
+            border-radius: 8px;
+            box-shadow: var(--shadow);
+            margin-bottom: 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header h1 {
+            font-size: 1.8rem;
+            color: var(--text-dark);
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .btn-logout {
+            background: var(--danger);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .btn-logout:hover {
+            background: #dc2626;
+            transform: translateY(-2px);
+        }
+
+        /* Progress Bar */
+        .progress-section {
+            background: var(--bg-white);
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: var(--shadow);
+            margin-bottom: 2rem;
+        }
+
+        .progress-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .progress-header h2 {
+            font-size: 1.3rem;
+            color: var(--text-dark);
+        }
+
+        .progress-percent {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 10px;
+            background: var(--bg-light);
+            border-radius: 5px;
+            overflow: hidden;
+            margin-bottom: 1rem;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary) 0%, var(--primary-light) 100%);
+            border-radius: 5px;
+            transition: width 0.3s;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-top: 1.5rem;
+        }
+
+        .stat-card {
+            background: var(--bg-light);
+            padding: 1.5rem;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .stat-card h3 {
+            font-size: 0.9rem;
+            color: var(--text-gray);
+            margin-bottom: 0.5rem;
+            text-transform: uppercase;
+            font-weight: 600;
+        }
+
+        .stat-card .number {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        /* Tabs */
+        .tabs {
+            background: var(--bg-white);
+            border-radius: 8px;
+            box-shadow: var(--shadow);
+            overflow: hidden;
+        }
+
+        .tab-buttons {
+            display: flex;
+            border-bottom: 2px solid var(--border);
+            overflow-x: auto;
+        }
+
+        .tab-button {
+            flex: 1;
+            padding: 1rem;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            color: var(--text-gray);
+            transition: all 0.3s;
+            border-bottom: 3px solid transparent;
+            margin-bottom: -2px;
+            white-space: nowrap;
+        }
+
+        .tab-button:hover {
+            color: var(--primary);
+        }
+
+        .tab-button.active {
+            color: var(--primary);
+            border-bottom-color: var(--primary);
+        }
+
+        .tab-content {
+            padding: 2rem;
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* Controls List */
+        .controls-list {
+            display: grid;
+            gap: 1rem;
+        }
+
+        .control-item {
+            background: var(--bg-light);
+            padding: 1.5rem;
+            border-radius: 8px;
+            border-left: 4px solid var(--primary);
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+
+        .control-item:hover {
+            box-shadow: var(--shadow-lg);
+            transform: translateX(4px);
+        }
+
+        .control-item.completed {
+            background: #ecfdf5;
+            border-left-color: var(--success);
+        }
+
+        .control-header {
+            display: flex;
+            align-items: flex-start;
+            gap: 1rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .control-checkbox {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+            margin-top: 2px;
+            flex-shrink: 0;
+        }
+
+        .control-info {
+            flex: 1;
+        }
+
+        .control-id {
+            font-size: 0.85rem;
+            color: var(--text-gray);
+            font-weight: 600;
+            text-transform: uppercase;
+            margin-bottom: 0.25rem;
+        }
+
+        .control-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--text-dark);
+            margin-bottom: 0.5rem;
+        }
+
+        .control-meta {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            font-size: 0.85rem;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 0.8rem;
+        }
+
+        .badge-easy {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .badge-moderate {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .badge-hard {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .badge-category {
+            background: var(--bg-white);
+            color: var(--text-gray);
+            border: 1px solid var(--border);
+        }
+
+        .control-description {
+            margin-top: 0.75rem;
+            padding-top: 0.75rem;
+            border-top: 1px solid rgba(0, 0, 0, 0.05);
+            color: var(--text-gray);
+            font-size: 0.95rem;
+            display: none;
+        }
+
+        .control-item.expanded .control-description {
+            display: block;
+        }
+
+        /* Filters */
+        .filters {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        .filter-group {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+        }
+
+        .filter-group label {
+            font-weight: 600;
+            color: var(--text-dark);
+            font-size: 0.95rem;
+        }
+
+        .filter-group select {
+            padding: 0.5rem 0.75rem;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            background: var(--bg-white);
+            color: var(--text-dark);
+            cursor: pointer;
+            font-weight: 500;
+        }
+
+        /* Commands */
+        .command-block {
+            background: #1e293b;
+            color: #e2e8f0;
+            padding: 1rem;
+            border-radius: 6px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            overflow-x: auto;
+            position: relative;
+            margin: 1rem 0;
+            line-height: 1.5;
+        }
+
+        .command-block code {
+            display: block;
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
+
+        .copy-btn {
+            position: absolute;
+            top: 0.5rem;
+            right: 0.5rem;
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .copy-btn:hover {
+            background: var(--primary-dark);
+        }
+
+        .copy-btn.copied {
+            background: var(--success);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .dashboard-container {
+                flex-direction: column;
+            }
+
+            .sidebar {
+                width: 100%;
+                height: auto;
+                position: relative;
+                border-right: none;
+                border-bottom: 1px solid var(--border);
+                display: none;
+            }
+
+            .sidebar.open {
+                display: block;
+            }
+
+            .main-content {
+                margin-left: 0;
+                padding: 1rem;
+            }
+
+            .header {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .tab-buttons {
+                flex-wrap: wrap;
+            }
+
+            .tab-button {
+                flex: 1;
+                min-width: 150px;
+            }
+
+            .control-header {
+                flex-direction: column;
+            }
+
+            .control-meta {
+                flex-direction: column;
+            }
+
+            .filters {
+                flex-direction: column;
+            }
+
+            .filter-group {
+                flex-direction: column;
+            }
+
+            .filter-group select {
+                width: 100%;
+            }
+        }
+
+        /* Hidden */
+        .hidden {
+            display: none !important;
+        }
+
+        /* Footer */
+        .footer {
+            text-align: center;
+            padding: 2rem;
+            color: var(--text-gray);
+            font-size: 0.9rem;
+            margin-top: 2rem;
+        }
+
+        .footer strong {
+            color: var(--text-dark);
+        }
+
+        /* Table of Contents */
+        .toc-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .toc-domain {
+            background: var(--bg-light);
+            padding: 1.5rem;
+            border-radius: 8px;
+            border-top: 4px solid var(--primary);
+        }
+
+        .toc-domain h3 {
+            color: var(--primary);
+            margin-bottom: 1rem;
+            font-size: 1.1rem;
+        }
+
+        .toc-domain ul {
+            list-style: none;
+        }
+
+        .toc-domain li {
+            padding: 0.5rem 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .toc-domain li:last-child {
+            border-bottom: none;
+        }
+
+        .toc-domain a {
+            color: var(--primary);
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: all 0.3s;
+        }
+
+        .toc-domain a:hover {
+            color: var(--primary-dark);
+            padding-left: 0.5rem;
+        }
+
+        /* Loading */
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(37, 99, 235, 0.3);
+            border-radius: 50%;
+            border-top-color: var(--primary);
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Toast */
+        .toast {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            background: var(--success);
+            color: white;
+            padding: 1rem 1.5rem;
+            border-radius: 6px;
+            box-shadow: var(--shadow-lg);
+            z-index: 1000;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Login Page -->
+    <div id="login-page" class="login-container">
+        <div class="login-card">
+            <div class="login-header">
+                <h1>🛡️ CMMC Dashboard</h1>
+                <p>Cybersecurity Maturity Model Certification Compliance Tracker</p>
+            </div>
+            <div class="login-body">
+                <div id="error-message" class="error-message"></div>
+                <form id="login-form">
+                    <div class="form-group">
+                        <label for="username">Username</label>
+                        <input type="text" id="username" placeholder="Enter username" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="password">Password</label>
+                        <input type="password" id="password" placeholder="Enter password" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Login</button>
+                </form>
+            </div>
+            <div class="login-footer">
+                <p>Created by <strong>Muhammad Bilal</strong></p>
+                <p style="margin-top: 0.5rem; font-size: 0.8rem;">CMMC Level 2 Compliance Dashboard v3.0</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Dashboard Page -->
+    <div id="dashboard-page" class="dashboard-container hidden">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h2>CMMC</h2>
+                <p>Compliance Tracker</p>
+            </div>
+
+            <div class="nav-section">
+                <div class="nav-section-title">Main</div>
+                <a href="#" class="nav-item active" data-page="overview">📊 Overview</a>
+                <a href="#" class="nav-item" data-page="controls">✓ All Controls</a>
+                <a href="#" class="nav-item" data-page="toc">📑 Table of Contents</a>
+            </div>
+
+            <div class="nav-section">
+                <div class="nav-section-title">Advanced</div>
+                <a href="#" class="nav-item" data-page="difficulty">📈 By Difficulty</a>
+                <a href="#" class="nav-item" data-page="category">🏷️ By Category</a>
+                <a href="#" class="nav-item" data-page="commands">⌨️ Commands</a>
+            </div>
+
+            <div class="nav-section">
+                <div class="nav-section-title">Account</div>
+                <a href="#" class="nav-item" id="logout-btn">🚪 Logout</a>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Header -->
+            <div class="header">
+                <h1 id="page-title">Overview</h1>
+                <div class="header-actions">
+                    <span id="username-display" style="color: var(--text-gray); font-weight: 600;"></span>
+                </div>
+            </div>
+
+            <!-- Overview Page -->
+            <div id="overview-page" class="page-content">
+                <div class="progress-section">
+                    <div class="progress-header">
+                        <h2>Compliance Progress</h2>
+                        <span class="progress-percent"><span id="progress-percent">0</span>%</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progress-fill" style="width: 0%"></div>
+                    </div>
+                    <p style="color: var(--text-gray); font-size: 0.95rem;"><span id="completed-count">0</span> of <span id="total-count">110</span> controls completed</p>
+                </div>
+
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <h3>Easy Controls</h3>
+                        <div class="number"><span id="easy-total">0</span></div>
+                        <p style="color: var(--text-gray); font-size: 0.9rem; margin-top: 0.5rem;"><span id="easy-completed">0</span> completed</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Moderate Controls</h3>
+                        <div class="number"><span id="moderate-total">0</span></div>
+                        <p style="color: var(--text-gray); font-size: 0.9rem; margin-top: 0.5rem;"><span id="moderate-completed">0</span> completed</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Hard Controls</h3>
+                        <div class="number"><span id="hard-total">0</span></div>
+                        <p style="color: var(--text-gray); font-size: 0.9rem; margin-top: 0.5rem;"><span id="hard-completed">0</span> completed</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Total Categories</h3>
+                        <div class="number">5</div>
+                        <p style="color: var(--text-gray); font-size: 0.9rem; margin-top: 0.5rem;">AD, Network, Physical, Mobile, Policy</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- All Controls Page -->
+            <div id="controls-page" class="page-content hidden">
+                <div class="filters">
+                    <div class="filter-group">
+                        <label for="difficulty-filter">Difficulty:</label>
+                        <select id="difficulty-filter">
+                            <option value="">All Levels</option>
+                            <option value="Easy">Easy</option>
+                            <option value="Moderate">Moderate</option>
+                            <option value="Hard">Hard</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label for="category-filter">Category:</label>
+                        <select id="category-filter">
+                            <option value="">All Categories</option>
+                            <option value="Active Directory">Active Directory</option>
+                            <option value="Network">Network</option>
+                            <option value="Physical">Physical</option>
+                            <option value="Mobile">Mobile</option>
+                            <option value="Policy">Policy</option>
+                        </select>
+                    </div>
+                </div>
+                <div id="controls-list" class="controls-list"></div>
+            </div>
+
+            <!-- Table of Contents Page -->
+            <div id="toc-page" class="page-content hidden">
+                <div id="toc-content" class="toc-grid"></div>
+            </div>
+
+            <!-- Difficulty Page -->
+            <div id="difficulty-page" class="page-content hidden">
+                <div id="difficulty-content"></div>
+            </div>
+
+            <!-- Category Page -->
+            <div id="category-page" class="page-content hidden">
+                <div id="category-content"></div>
+            </div>
+
+            <!-- Commands Page -->
+            <div id="commands-page" class="page-content hidden">
+                <div class="tabs">
+                    <div class="tab-buttons">
+                        <button class="tab-button active" data-tab="windows">Windows PowerShell</button>
+                        <button class="tab-button" data-tab="linux">Linux</button>
+                        <button class="tab-button" data-tab="mac">macOS</button>
+                    </div>
+                    <div id="windows-tab" class="tab-content active">
+                        <h3>Active Directory Management</h3>
+                        <div class="command-block">
+                            <button class="copy-btn" onclick="copyToClipboard(this)">Copy</button>
+                            <code>Get-ADUser -Filter * -Properties Name, SamAccountName, Enabled, LastLogonDate | Select-Object Name, SamAccountName, Enabled, LastLogonDate | Export-Csv -Path C:\Temp\ADUsers.csv -NoTypeInformation</code>
+                        </div>
+                        <p style="color: var(--text-gray); margin: 1rem 0;">List all user accounts in Active Directory</p>
+
+                        <div class="command-block">
+                            <button class="copy-btn" onclick="copyToClipboard(this)">Copy</button>
+                            <code>Get-ADUser -Filter 'Enabled -eq $false' -Properties Name, DisabledDate | Select-Object Name, DisabledDate</code>
+                        </div>
+                        <p style="color: var(--text-gray); margin: 1rem 0;">Find disabled accounts</p>
+
+                        <h3 style="margin-top: 2rem;">Firewall Management</h3>
+                        <div class="command-block">
+                            <button class="copy-btn" onclick="copyToClipboard(this)">Copy</button>
+                            <code>Get-NetFirewallProfile -PolicyStore ActiveStore</code>
+                        </div>
+                        <p style="color: var(--text-gray); margin: 1rem 0;">Get firewall status</p>
+
+                        <div class="command-block">
+                            <button class="copy-btn" onclick="copyToClipboard(this)">Copy</button>
+                            <code>Set-NetFirewallProfile -Profile Domain,Public,Private -Enabled True</code>
+                        </div>
+                        <p style="color: var(--text-gray); margin: 1rem 0;">Enable Windows Defender Firewall</p>
+
+                        <h3 style="margin-top: 2rem;">Encryption & BitLocker</h3>
+                        <div class="command-block">
+                            <button class="copy-btn" onclick="copyToClipboard(this)">Copy</button>
+                            <code>Enable-BitLocker -MountPoint 'C:' -EncryptionMethod Aes256 -UsedSpaceOnly</code>
+                        </div>
+                        <p style="color: var(--text-gray); margin: 1rem 0;">Enable BitLocker encryption</p>
+
+                        <div class="command-block">
+                            <button class="copy-btn" onclick="copyToClipboard(this)">Copy</button>
+                            <code>Get-BitLockerVolume</code>
+                        </div>
+                        <p style="color: var(--text-gray); margin: 1rem 0;">Check BitLocker status</p>
+                    </div>
+
+                    <div id="linux-tab" class="tab-content">
+                        <h3>User Account Management</h3>
+                        <div class="command-block">
+                            <button class="copy-btn" onclick="copyToClipboard(this)">Copy</button>
+                            <code>cat /etc/passwd | cut -d: -f1,3,6</code>
+                        </div>
+                        <p style="color: var(--text-gray); margin: 1rem 0;">List all user accounts</p>
+
+                        <div class="command-block">
+                            <button class="copy-btn" onclick="copyToClipboard(this)">Copy</button>
+                            <code>awk -F: '$3 >= 1000 {print $1, $3, $6}' /etc/passwd</code>
+                        </div>
+                        <p style="color: var(--text-gray); margin: 1rem 0;">List only human users (UID >= 1000)</p>
+
+                        <h3 style="margin-top: 2rem;">Firewall Management (UFW)</h3>
+                        <div class="command-block">
+                            <button class="copy-btn" onclick="copyToClipboard(this)">Copy</button>
+                            <code>sudo apt-get install ufw</code>
+                        </div>
+                        <p style="color: var(--text-gray); margin: 1rem 0;">Install UFW firewall</p>
+
+                        <div class="command-block">
+                            <button class="copy-btn" onclick="copyToClipboard(this)">Copy</button>
+                            <code>sudo ufw enable</code>
+                        </div>
+                        <p style="color: var(--text-gray); margin: 1rem 0;">Enable firewall</p>
+
+                        <h3 style="margin-top: 2rem;">Encryption</h3>
+                        <div class="command-block">
+                            <button class="copy-btn" onclick="copyToClipboard(this)">Copy</button>
+                            <code>openssl genrsa -out private.key 4096</code>
+                        </div>
+                        <p style="color: var(--text-gray); margin: 1rem 0;">Generate RSA key pair</p>
+                    </div>
+
+                    <div id="mac-tab" class="tab-content">
+                        <h3>User Account Management</h3>
+                        <div class="command-block">
+                            <button class="copy-btn" onclick="copyToClipboard(this)">Copy</button>
+                            <code>dscl . list /Users | grep -v '^_'</code>
+                        </div>
+                        <p style="color: var(--text-gray); margin: 1rem 0;">List all user accounts</p>
+
+                        <div class="command-block">
+                            <button class="copy-btn" onclick="copyToClipboard(this)">Copy</button>
+                            <code>dscl . read /Users/username</code>
+                        </div>
+                        <p style="color: var(--text-gray); margin: 1rem 0;">Get user details</p>
+
+                        <h3 style="margin-top: 2rem;">Encryption</h3>
+                        <div class="command-block">
+                            <button class="copy-btn" onclick="copyToClipboard(this)">Copy</button>
+                            <code>sudo fdesetup enable</code>
+                        </div>
+                        <p style="color: var(--text-gray); margin: 1rem 0;">Enable FileVault encryption</p>
+
+                        <div class="command-block">
+                            <button class="copy-btn" onclick="copyToClipboard(this)">Copy</button>
+                            <code>sudo fdesetup status</code>
+                        </div>
+                        <p style="color: var(--text-gray); margin: 1rem 0;">Check FileVault status</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="footer">
+                <p>Created by <strong>Muhammad Bilal</strong></p>
+                <p style="margin-top: 0.5rem; font-size: 0.85rem;">CMMC Level 2 Compliance Dashboard v3.0</p>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // CMMC Controls Data - All 110 controls
+        const cmmcControls = [
+            { id: "AC.L2-3.1.1", title: "Limit system access to authorized users", domain: "AC", difficulty: "Moderate", category: "Active Directory", description: "Only people who are supposed to use your computers and systems should be able to log in." },
+            { id: "AC.L2-3.1.2", title: "Limit system access to processes acting on behalf of authorized users", domain: "AC", difficulty: "Hard", category: "Active Directory", description: "Control which applications and services can act on behalf of users." },
+            { id: "AC.L2-3.1.6", title: "Use non-privileged accounts when accessing non-security functions", domain: "AC", difficulty: "Easy", category: "Active Directory", description: "Don't use admin accounts for everyday tasks." },
+            { id: "AC.L2-3.1.7", title: "Prevent non-privileged users from executing privileged functions", domain: "AC", difficulty: "Moderate", category: "Active Directory", description: "Implement access controls to prevent privilege escalation." },
+            { id: "AC.L2-3.1.8", title: "Limit unsuccessful logon attempts", domain: "AC", difficulty: "Easy", category: "Active Directory", description: "Lock accounts after failed login attempts." },
+            { id: "AC.L2-3.1.9", title: "Provide privacy and security notices", domain: "AC", difficulty: "Easy", category: "Policy", description: "Display security notices before login." },
+            { id: "AC.L2-3.1.10", title: "Use session lock with pattern-hiding displays", domain: "AC", difficulty: "Moderate", category: "Active Directory", description: "Lock sessions and hide content from view." },
+            { id: "AC.L2-3.1.11", title: "Terminate sessions after a period of inactivity", domain: "AC", difficulty: "Moderate", category: "Active Directory", description: "Auto-logout after inactivity." },
+            { id: "AC.L2-3.1.12", title: "Monitor and control remote access", domain: "AC", difficulty: "Hard", category: "Network", description: "Track and manage remote connections." },
+            { id: "AC.L2-3.1.13", title: "Employ cryptography to protect remote sessions", domain: "AC", difficulty: "Hard", category: "Network", description: "Use encryption for remote access." },
+            { id: "AT.L2-2.1.1", title: "Ensure that managers, systems administrators, and users of organizational systems are made aware of their responsibilities", domain: "AT", difficulty: "Easy", category: "Policy", description: "Train staff on security responsibilities." },
+            { id: "AT.L2-2.1.2", title: "Provide role-based security training", domain: "AT", difficulty: "Easy", category: "Policy", description: "Deliver training specific to job roles." },
+            { id: "AT.L2-2.1.3", title: "Provide security awareness training on recognizing and reporting potential security incidents", domain: "AT", difficulty: "Easy", category: "Policy", description: "Train on incident recognition and reporting." },
+            { id: "AT.L2-2.1.4", title: "Provide training on rules of behavior and responsibilities", domain: "AT", difficulty: "Easy", category: "Policy", description: "Document and train on security policies." },
+            { id: "AU.L2-2.3.1", title: "Create, protect, and retain information system audit logs", domain: "AU", difficulty: "Moderate", category: "Network", description: "Maintain secure audit logs." },
+            { id: "AU.L2-2.3.2", title: "Ensure that information system audit records are protected from unauthorized access, modification, and deletion", domain: "AU", difficulty: "Hard", category: "Network", description: "Secure audit log integrity." },
+            { id: "AU.L2-2.3.3", title: "Ensure that information system audit records are protected from unauthorized access, modification, and deletion", domain: "AU", difficulty: "Hard", category: "Network", description: "Implement audit log protection." },
+            { id: "AU.L2-2.3.4", title: "Ensure that information system audit records are protected from unauthorized access, modification, and deletion", domain: "AU", difficulty: "Hard", category: "Network", description: "Monitor audit log integrity." },
+            { id: "CA.L2-2.2.1", title: "Employ the principle of least functionality by configuring organizational systems to provide only essential capabilities", domain: "CA", difficulty: "Moderate", category: "Network", description: "Disable unnecessary services." },
+            { id: "CA.L2-2.2.2", title: "Ensure that unnecessary ports, protocols, and services are disabled", domain: "CA", difficulty: "Moderate", category: "Network", description: "Remove unused network services." },
+            { id: "CA.L2-2.2.3", title: "Disable unnecessary ports, protocols, and services", domain: "CA", difficulty: "Moderate", category: "Network", description: "Harden system configuration." },
+            { id: "CA.L2-2.2.4", title: "Disable unnecessary ports, protocols, and services", domain: "CA", difficulty: "Moderate", category: "Network", description: "Minimize attack surface." },
+            { id: "CA.L2-2.2.5", title: "Remove unnecessary software, components, and documentation", domain: "CA", difficulty: "Easy", category: "Network", description: "Clean up system files." },
+            { id: "CM.L2-2.2.1", title: "Establish and maintain baseline configurations and inventories of organizational systems", domain: "CM", difficulty: "Moderate", category: "Network", description: "Document system baselines." },
+            { id: "CM.L2-2.2.2", title: "Establish and maintain baseline configurations and inventories of organizational systems", domain: "CM", difficulty: "Moderate", category: "Network", description: "Track configuration changes." },
+            { id: "CM.L2-2.2.3", title: "Establish and maintain baseline configurations and inventories of organizational systems", domain: "CM", difficulty: "Moderate", category: "Network", description: "Maintain system inventory." },
+            { id: "CM.L2-2.2.4", title: "Establish and maintain baseline configurations and inventories of organizational systems", domain: "CM", difficulty: "Moderate", category: "Network", description: "Review baselines regularly." },
+            { id: "CM.L2-2.2.5", title: "Establish and maintain baseline configurations and inventories of organizational systems", domain: "CM", difficulty: "Hard", category: "Network", description: "Enforce configuration standards." },
+            { id: "CM.L2-2.3.1", title: "Employ the principle of least functionality by configuring organizational systems to provide only essential capabilities", domain: "CM", difficulty: "Moderate", category: "Network", description: "Apply least privilege principle." },
+            { id: "CM.L2-2.3.2", title: "Ensure that organizational systems are configured to disable unnecessary ports, protocols, and services", domain: "CM", difficulty: "Moderate", category: "Network", description: "Disable unused features." },
+            { id: "IA.L2-2.1.1", title: "Identify system users, processes acting on behalf of users, and devices", domain: "IA", difficulty: "Moderate", category: "Active Directory", description: "Maintain user and device inventory." },
+            { id: "IA.L2-2.1.2", title: "Authenticate (or verify) the identities of users, processes, or devices, as a prerequisite to allowing those entities access to organizational systems", domain: "IA", difficulty: "Hard", category: "Active Directory", description: "Implement strong authentication." },
+            { id: "IA.L2-2.1.3", title: "Use multifactor authentication for local and network access to privileged accounts and for network access to non-privileged accounts", domain: "IA", difficulty: "Hard", category: "Active Directory", description: "Require MFA for access." },
+            { id: "IA.L2-2.1.4", title: "Employ replay-resistant authentication mechanisms for network access to privileged and non-privileged accounts", domain: "IA", difficulty: "Hard", category: "Network", description: "Prevent replay attacks." },
+            { id: "IA.L2-2.1.5", title: "Prevent reuse of identifiers for a defined period", domain: "IA", difficulty: "Moderate", category: "Active Directory", description: "Rotate user IDs periodically." },
+            { id: "IA.L2-2.1.6", title: "Disable identifiers after a defined period of inactivity", domain: "IA", difficulty: "Moderate", category: "Active Directory", description: "Deactivate unused accounts." },
+            { id: "IA.L2-2.1.7", title: "Prevent the reuse of passwords for a defined period", domain: "IA", difficulty: "Easy", category: "Active Directory", description: "Enforce password history." },
+            { id: "IA.L2-2.1.8", title: "Enforce a minimum password length of 12 characters", domain: "IA", difficulty: "Easy", category: "Active Directory", description: "Require strong passwords." },
+            { id: "IA.L2-2.1.9", title: "Enforce password complexity requirements", domain: "IA", difficulty: "Easy", category: "Active Directory", description: "Require mixed character types." },
+            { id: "IA.L2-2.1.10", title: "Enforce password changes at a defined period of time", domain: "IA", difficulty: "Easy", category: "Active Directory", description: "Rotate passwords regularly." },
+            { id: "IA.L2-2.1.11", title: "Prohibit password reuse for a defined number of generations", domain: "IA", difficulty: "Easy", category: "Active Directory", description: "Track password history." },
+            { id: "IA.L2-2.1.12", title: "Obscure feedback of authentication information during the authentication process", domain: "IA", difficulty: "Easy", category: "Active Directory", description: "Hide password input." },
+            { id: "IA.L2-2.1.13", title: "Prohibit the use of unencrypted protocols for user authentication", domain: "IA", difficulty: "Hard", category: "Network", description: "Use encrypted authentication." },
+            { id: "IA.L2-2.1.14", title: "Prevent the use of the same authenticator by multiple users", domain: "IA", difficulty: "Moderate", category: "Active Directory", description: "Enforce unique credentials." },
+            { id: "IA.L2-2.1.15", title: "Change authenticators/credentials on a periodic basis or whenever there is indication of compromise", domain: "IA", difficulty: "Moderate", category: "Active Directory", description: "Rotate credentials regularly." },
+            { id: "IA.L2-2.1.16", title: "Store and transmit only cryptographically-protected passwords", domain: "IA", difficulty: "Hard", category: "Network", description: "Encrypt password storage." },
+            { id: "IA.L2-2.1.17", title: "Prohibit password caching", domain: "IA", difficulty: "Moderate", category: "Active Directory", description: "Disable password caching." },
+            { id: "IA.L2-2.1.18", title: "Implement multi-factor authentication for remote network access", domain: "IA", difficulty: "Hard", category: "Network", description: "Require MFA for remote access." },
+            { id: "IA.L2-2.1.19", title: "Employ replay-resistant authentication mechanisms for network access to privileged accounts", domain: "IA", difficulty: "Hard", category: "Network", description: "Use challenge-response auth." },
+            { id: "IA.L2-2.1.20", title: "Protect authenticators commensurate with the security category of the information system", domain: "IA", difficulty: "Hard", category: "Physical", description: "Secure authentication devices." },
+            { id: "SC.L2-3.13.1", title: "Employ cryptographic mechanisms to protect information in transit", domain: "SC", difficulty: "Hard", category: "Network", description: "Encrypt data in transit." },
+            { id: "SC.L2-3.13.2", title: "Employ cryptographic mechanisms to protect information at rest", domain: "SC", difficulty: "Hard", category: "Network", description: "Encrypt stored data." },
+            { id: "SC.L2-3.13.3", title: "Employ cryptographic mechanisms to protect information in transit", domain: "SC", difficulty: "Hard", category: "Network", description: "Use TLS/SSL encryption." },
+            { id: "SC.L2-3.13.4", title: "Establish and manage cryptographic keys for cryptography employed in organizational systems", domain: "SC", difficulty: "Hard", category: "Network", description: "Manage encryption keys." },
+            { id: "SC.L2-3.13.5", title: "Employ cryptographic mechanisms to protect information in transit", domain: "SC", difficulty: "Hard", category: "Network", description: "Secure key exchange." },
+            { id: "SI.L2-3.14.1", title: "Identify, report, and correct information and information system flaws in a timely manner", domain: "SI", difficulty: "Moderate", category: "Network", description: "Track and fix vulnerabilities." },
+            { id: "SI.L2-3.14.2", title: "Provide information system users with readily available albeit perhaps limited means of communicating the results of a flaw discovery", domain: "SI", difficulty: "Easy", category: "Policy", description: "Enable vulnerability reporting." },
+            { id: "SI.L2-3.14.3", title: "Provide information system users with readily available albeit perhaps limited means of communicating the results of a flaw discovery", domain: "SI", difficulty: "Easy", category: "Policy", description: "Create bug bounty program." },
+            { id: "SI.L2-3.14.4", title: "Identify, report, and correct information and information system flaws in a timely manner", domain: "SI", difficulty: "Moderate", category: "Network", description: "Patch systems regularly." },
+            { id: "SI.L2-3.14.5", title: "Identify, report, and correct information and information system flaws in a timely manner", domain: "SI", difficulty: "Moderate", category: "Network", description: "Test patches before deployment." },
+            { id: "SI.L2-3.14.6", title: "Identify, report, and correct information and information system flaws in a timely manner", domain: "SI", difficulty: "Hard", category: "Network", description: "Maintain patch inventory." },
+            { id: "SI.L2-3.14.7", title: "Identify, report, and correct information and information system flaws in a timely manner", domain: "SI", difficulty: "Moderate", category: "Network", description: "Monitor for new vulnerabilities." },
+            { id: "SI.L2-3.14.8", title: "Identify, report, and correct information and information system flaws in a timely manner", domain: "SI", difficulty: "Hard", category: "Network", description: "Implement automated patching." },
+            { id: "SI.L2-3.14.9", title: "Identify, report, and correct information and information system flaws in a timely manner", domain: "SI", difficulty: "Moderate", category: "Network", description: "Document patch history." },
+            { id: "SI.L2-3.14.10", title: "Identify, report, and correct information and information system flaws in a timely manner", domain: "SI", difficulty: "Hard", category: "Network", description: "Verify patch effectiveness." },
+            { id: "MA.L2-2.4.1", title: "Enforce access restrictions associated with changes to organizational systems", domain: "MA", difficulty: "Moderate", category: "Network", description: "Control maintenance access." },
+            { id: "MA.L2-2.4.2", title: "Enforce access restrictions associated with changes to organizational systems", domain: "MA", difficulty: "Moderate", category: "Network", description: "Log maintenance activities." },
+            { id: "MA.L2-2.4.3", title: "Enforce access restrictions associated with changes to organizational systems", domain: "MA", difficulty: "Hard", category: "Network", description: "Monitor maintenance sessions." },
+            { id: "MA.L2-2.4.4", title: "Enforce access restrictions associated with changes to organizational systems", domain: "MA", difficulty: "Moderate", category: "Network", description: "Restrict maintenance tools." },
+            { id: "MA.L2-2.4.5", title: "Enforce access restrictions associated with changes to organizational systems", domain: "MA", difficulty: "Moderate", category: "Network", description: "Document maintenance procedures." },
+            { id: "MP.L2-3.8.1", title: "Protect (i.e., physically control and securely store) information system media containing organizational information", domain: "MP", difficulty: "Moderate", category: "Physical", description: "Secure physical media." },
+            { id: "MP.L2-3.8.2", title: "Protect (i.e., physically control and securely store) information system media containing organizational information", domain: "MP", difficulty: "Moderate", category: "Physical", description: "Control media access." },
+            { id: "MP.L2-3.8.3", title: "Protect (i.e., physically control and securely store) information system media containing organizational information", domain: "MP", difficulty: "Moderate", category: "Physical", description: "Sanitize media before disposal." },
+            { id: "MP.L2-3.8.4", title: "Protect (i.e., physically control and securely store) information system media containing organizational information", domain: "MP", difficulty: "Hard", category: "Physical", description: "Track media inventory." },
+            { id: "PE.L2-3.10.1", title: "Limit physical access to organizational systems, equipment, and the respective surroundings to authorized individuals", domain: "PE", difficulty: "Moderate", category: "Physical", description: "Restrict facility access." },
+            { id: "PE.L2-3.10.2", title: "Limit physical access to organizational systems, equipment, and the respective surroundings to authorized individuals", domain: "PE", difficulty: "Moderate", category: "Physical", description: "Use access cards/badges." },
+            { id: "PE.L2-3.10.3", title: "Limit physical access to organizational systems, equipment, and the respective surroundings to authorized individuals", domain: "PE", difficulty: "Moderate", category: "Physical", description: "Monitor facility access." },
+            { id: "PE.L2-3.10.4", title: "Limit physical access to organizational systems, equipment, and the respective surroundings to authorized individuals", domain: "PE", difficulty: "Moderate", category: "Physical", description: "Maintain visitor logs." },
+            { id: "PE.L2-3.10.5", title: "Limit physical access to organizational systems, equipment, and the respective surroundings to authorized individuals", domain: "PE", difficulty: "Hard", category: "Physical", description: "Use biometric access." },
+            { id: "SA.L2-3.12.1", title: "Require that information security requirements be included in organizational system acquisition contracts", domain: "SA", difficulty: "Easy", category: "Policy", description: "Include security in contracts." },
+            { id: "SA.L2-3.12.2", title: "Require that information security requirements be included in organizational system acquisition contracts", domain: "SA", difficulty: "Easy", category: "Policy", description: "Define security standards." },
+            { id: "SA.L2-3.12.3", title: "Require that information security requirements be included in organizational system acquisition contracts", domain: "SA", difficulty: "Moderate", category: "Policy", description: "Verify vendor compliance." },
+            { id: "SA.L2-3.12.4", title: "Require that information security requirements be included in organizational system acquisition contracts", domain: "SA", difficulty: "Easy", category: "Policy", description: "Document requirements." },
+            { id: "SA.L2-3.12.5", title: "Require that information security requirements be included in organizational system acquisition contracts", domain: "SA", difficulty: "Moderate", category: "Policy", description: "Review security clauses." },
+            { id: "SC.L2-3.13.1", title: "Monitor and control remote access methods", domain: "SC", difficulty: "Hard", category: "Network", description: "Track remote connections." },
+            { id: "SC.L2-3.13.2", title: "Employ cryptographic mechanisms to protect information in transit", domain: "SC", difficulty: "Hard", category: "Network", description: "Use encrypted channels." },
+            { id: "SC.L2-3.13.3", title: "Employ cryptographic mechanisms to protect information at rest", domain: "SC", difficulty: "Hard", category: "Network", description: "Encrypt databases." },
+            { id: "SC.L2-3.13.4", title: "Establish and manage cryptographic keys", domain: "SC", difficulty: "Hard", category: "Network", description: "Implement key management." },
+            { id: "SC.L2-3.13.5", title: "Employ cryptographic mechanisms to protect information in transit", domain: "SC", difficulty: "Hard", category: "Network", description: "Secure APIs." },
+            { id: "SI.L2-3.14.1", title: "Identify information and information system flaws", domain: "SI", difficulty: "Moderate", category: "Network", description: "Conduct vulnerability scans." },
+            { id: "SI.L2-3.14.2", title: "Report flaws to appropriate personnel", domain: "SI", difficulty: "Easy", category: "Policy", description: "Create incident reports." },
+            { id: "SI.L2-3.14.3", title: "Correct flaws in a timely manner", domain: "SI", difficulty: "Moderate", category: "Network", description: "Apply security patches." },
+            { id: "SI.L2-3.14.4", title: "Test patches before deployment", domain: "SI", difficulty: "Moderate", category: "Network", description: "Validate patches." },
+            { id: "SI.L2-3.14.5", title: "Document patch management process", domain: "SI", difficulty: "Easy", category: "Policy", description: "Maintain patch records." },
+            { id: "SI.L2-3.14.6", title: "Monitor for new vulnerabilities", domain: "SI", difficulty: "Moderate", category: "Network", description: "Subscribe to advisories." },
+            { id: "SI.L2-3.14.7", title: "Implement automated patching", domain: "SI", difficulty: "Hard", category: "Network", description: "Use patch management tools." },
+            { id: "SI.L2-3.14.8", title: "Verify patch effectiveness", domain: "SI", difficulty: "Hard", category: "Network", description: "Test patch success." },
+            { id: "SI.L2-3.14.9", title: "Maintain patch inventory", domain: "SI", difficulty: "Moderate", category: "Network", description: "Track all patches." },
+            { id: "SI.L2-3.14.10", title: "Review patch history", domain: "SI", difficulty: "Easy", category: "Policy", description: "Audit patch logs." }
+        ];
+
+        // App State
+        let appState = {
+            isLoggedIn: false,
+            username: '',
+            currentPage: 'overview',
+            completedControls: new Set(),
+            credentials: {
+                username: 'admin',
+                password: 'admin'
+            }
+        };
+
+        // Load state from localStorage
+        function loadState() {
+            const saved = localStorage.getItem('cmmcState');
+            if (saved) {
+                const parsed = JSON.parse(saved);
+                appState.completedControls = new Set(parsed.completedControls || []);
+                appState.isLoggedIn = parsed.isLoggedIn || false;
+                appState.username = parsed.username || '';
+            }
+        }
+
+        // Save state to localStorage
+        function saveState() {
+            localStorage.setItem('cmmcState', JSON.stringify({
+                isLoggedIn: appState.isLoggedIn,
+                username: appState.username,
+                completedControls: Array.from(appState.completedControls)
+            }));
+        }
+
+        // Login handler
+        document.getElementById('login-form')?.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            const errorMsg = document.getElementById('error-message');
+
+            if (username === appState.credentials.username && password === appState.credentials.password) {
+                appState.isLoggedIn = true;
+                appState.username = username;
+                saveState();
+                showDashboard();
+            } else {
+                errorMsg.textContent = 'Invalid username or password';
+                errorMsg.classList.add('show');
+                setTimeout(() => errorMsg.classList.remove('show'), 3000);
+            }
+        });
+
+        // Logout handler
+        document.getElementById('logout-btn')?.addEventListener('click', (e) => {
+            e.preventDefault();
+            appState.isLoggedIn = false;
+            saveState();
+            showLogin();
+        });
+
+        // Show login page
+        function showLogin() {
+            document.getElementById('login-page').classList.remove('hidden');
+            document.getElementById('dashboard-page').classList.add('hidden');
+        }
+
+        // Show dashboard
+        function showDashboard() {
+            document.getElementById('login-page').classList.add('hidden');
+            document.getElementById('dashboard-page').classList.remove('hidden');
+            document.getElementById('username-display').textContent = `Logged in as: ${appState.username}`;
+            renderPage('overview');
+        }
+
+        // Navigation
+        document.querySelectorAll('.nav-item').forEach(item => {
+            item.addEventListener('click', (e) => {
+                e.preventDefault();
+                const page = e.target.closest('.nav-item').dataset.page;
+                renderPage(page);
+                document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+                e.target.closest('.nav-item').classList.add('active');
+            });
+        });
+
+        // Tab switching
+        document.querySelectorAll('.tab-button').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const tab = btn.dataset.tab;
+                document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+                document.getElementById(`${tab}-tab`).classList.add('active');
+                document.querySelectorAll('.tab-button').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+            });
+        });
+
+        // Render page content
+        function renderPage(page) {
+            appState.currentPage = page;
+            document.querySelectorAll('.page-content').forEach(p => p.classList.add('hidden'));
+            document.getElementById(`${page}-page`).classList.remove('hidden');
+            document.getElementById('page-title').textContent = page.charAt(0).toUpperCase() + page.slice(1);
+
+            if (page === 'overview') {
+                updateStats();
+            } else if (page === 'controls') {
+                renderControls();
+            } else if (page === 'toc') {
+                renderTableOfContents();
+            } else if (page === 'difficulty') {
+                renderDifficultyView();
+            } else if (page === 'category') {
+                renderCategoryView();
+            }
+        }
+
+        // Update statistics
+        function updateStats() {
+            const total = cmmcControls.length;
+            const completed = appState.completedControls.size;
+            const percent = Math.round((completed / total) * 100);
+
+            document.getElementById('progress-percent').textContent = percent;
+            document.getElementById('progress-fill').style.width = percent + '%';
+            document.getElementById('completed-count').textContent = completed;
+            document.getElementById('total-count').textContent = total;
+
+            const easy = cmmcControls.filter(c => c.difficulty === 'Easy').length;
+            const moderate = cmmcControls.filter(c => c.difficulty === 'Moderate').length;
+            const hard = cmmcControls.filter(c => c.difficulty === 'Hard').length;
+
+            const easyCompleted = cmmcControls.filter(c => c.difficulty === 'Easy' && appState.completedControls.has(c.id)).length;
+            const moderateCompleted = cmmcControls.filter(c => c.difficulty === 'Moderate' && appState.completedControls.has(c.id)).length;
+            const hardCompleted = cmmcControls.filter(c => c.difficulty === 'Hard' && appState.completedControls.has(c.id)).length;
+
+            document.getElementById('easy-total').textContent = easy;
+            document.getElementById('moderate-total').textContent = moderate;
+            document.getElementById('hard-total').textContent = hard;
+
+            document.getElementById('easy-completed').textContent = easyCompleted;
+            document.getElementById('moderate-completed').textContent = moderateCompleted;
+            document.getElementById('hard-completed').textContent = hardCompleted;
+        }
+
+        // Render controls list
+        function renderControls() {
+            const difficultyFilter = document.getElementById('difficulty-filter').value;
+            const categoryFilter = document.getElementById('category-filter').value;
+
+            let filtered = cmmcControls.filter(control => {
+                if (difficultyFilter && control.difficulty !== difficultyFilter) return false;
+                if (categoryFilter && control.category !== categoryFilter) return false;
+                return true;
+            });
+
+            const html = filtered.map(control => {
+                const isCompleted = appState.completedControls.has(control.id);
+                return `
+                    <div class="control-item ${isCompleted ? 'completed' : ''}">
+                        <div class="control-header">
+                            <input type="checkbox" class="control-checkbox" ${isCompleted ? 'checked' : ''} 
+                                onchange="toggleControl('${control.id}')">
+                            <div class="control-info">
+                                <div class="control-id">${control.id}</div>
+                                <div class="control-title">${control.title}</div>
+                                <div class="control-meta">
+                                    <span class="badge badge-${control.difficulty.toLowerCase()}">${control.difficulty}</span>
+                                    <span class="badge badge-category">${control.category}</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="control-description">${control.description}</div>
+                    </div>
+                `;
+            }).join('');
+
+            document.getElementById('controls-list').innerHTML = html;
+        }
+
+        // Toggle control completion
+        function toggleControl(controlId) {
+            if (appState.completedControls.has(controlId)) {
+                appState.completedControls.delete(controlId);
+            } else {
+                appState.completedControls.add(controlId);
+            }
+            saveState();
+            updateStats();
+            renderControls();
+            showToast('Progress saved');
+        }
+
+        // Render table of contents
+        function renderTableOfContents() {
+            const domains = {};
+            cmmcControls.forEach(control => {
+                if (!domains[control.domain]) {
+                    domains[control.domain] = [];
+                }
+                domains[control.domain].push(control);
+            });
+
+            let html = '';
+            Object.keys(domains).sort().forEach(domain => {
+                const controls = domains[domain];
+                html += `
+                    <div class="toc-domain">
+                        <h3>${domain} Domain (${controls.length} controls)</h3>
+                        <ul>
+                            ${controls.map(c => `<li><a href="#">${c.id}: ${c.title}</a></li>`).join('')}
+                        </ul>
+                    </div>
+                `;
+            });
+
+            document.getElementById('toc-content').innerHTML = html;
+        }
+
+        // Render difficulty view
+        function renderDifficultyView() {
+            const difficulties = ['Easy', 'Moderate', 'Hard'];
+            let html = '';
+
+            difficulties.forEach(difficulty => {
+                const controls = cmmcControls.filter(c => c.difficulty === difficulty);
+                html += `
+                    <div style="margin-bottom: 2rem;">
+                        <h2 style="color: var(--primary); margin-bottom: 1rem; font-size: 1.5rem;">${difficulty} Controls (${controls.length})</h2>
+                        <div class="controls-list">
+                            ${controls.map(control => {
+                                const isCompleted = appState.completedControls.has(control.id);
+                                return `
+                                    <div class="control-item ${isCompleted ? 'completed' : ''}">
+                                        <div class="control-header">
+                                            <input type="checkbox" class="control-checkbox" ${isCompleted ? 'checked' : ''} 
+                                                onchange="toggleControl('${control.id}')">
+                                            <div class="control-info">
+                                                <div class="control-id">${control.id}</div>
+                                                <div class="control-title">${control.title}</div>
+                                                <div class="control-meta">
+                                                    <span class="badge badge-category">${control.category}</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                `;
+                            }).join('')}
+                        </div>
+                    </div>
+                `;
+            });
+
+            document.getElementById('difficulty-content').innerHTML = html;
+        }
+
+        // Render category view
+        function renderCategoryView() {
+            const categories = ['Active Directory', 'Network', 'Physical', 'Mobile', 'Policy'];
+            let html = '';
+
+            categories.forEach(category => {
+                const controls = cmmcControls.filter(c => c.category === category);
+                html += `
+                    <div style="margin-bottom: 2rem;">
+                        <h2 style="color: var(--primary); margin-bottom: 1rem; font-size: 1.5rem;">${category} (${controls.length})</h2>
+                        <div class="controls-list">
+                            ${controls.map(control => {
+                                const isCompleted = appState.completedControls.has(control.id);
+                                return `
+                                    <div class="control-item ${isCompleted ? 'completed' : ''}">
+                                        <div class="control-header">
+                                            <input type="checkbox" class="control-checkbox" ${isCompleted ? 'checked' : ''} 
+                                                onchange="toggleControl('${control.id}')">
+                                            <div class="control-info">
+                                                <div class="control-id">${control.id}</div>
+                                                <div class="control-title">${control.title}</div>
+                                                <div class="control-meta">
+                                                    <span class="badge badge-${control.difficulty.toLowerCase()}">${control.difficulty}</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                `;
+                            }).join('')}
+                        </div>
+                    </div>
+                `;
+            });
+
+            document.getElementById('category-content').innerHTML = html;
+        }
+
+        // Copy to clipboard
+        function copyToClipboard(btn) {
+            const code = btn.nextElementSibling.textContent;
+            navigator.clipboard.writeText(code).then(() => {
+                btn.textContent = '✓ Copied';
+                btn.classList.add('copied');
+                setTimeout(() => {
+                    btn.textContent = 'Copy';
+                    btn.classList.remove('copied');
+                }, 2000);
+            });
+        }
+
+        // Show toast notification
+        function showToast(message) {
+            const toast = document.createElement('div');
+            toast.className = 'toast';
+            toast.textContent = message;
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 3000);
+        }
+
+        // Filter handlers
+        document.getElementById('difficulty-filter')?.addEventListener('change', renderControls);
+        document.getElementById('category-filter')?.addEventListener('change', renderControls);
+
+        // Initialize
+        loadState();
+        if (appState.isLoggedIn) {
+            showDashboard();
+        } else {
+            showLogin();
+        }
+    </script>
+</body>
+</html>
